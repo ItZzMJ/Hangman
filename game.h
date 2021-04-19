@@ -5,7 +5,24 @@
 #ifndef HANGMAN_GAME_H
 #define HANGMAN_GAME_H
 
-int run(char solution[]);
+typedef struct
+{
+    char username[128];
+    int success_count;
+    int error_count;
+    double time;
+    int success;
+    int mode; //1 = 1 Spieler, 2 = 2 Spieler, 3 = Gegen Zeit
+} Statistic;
+
+//Umlaute
+char ae;
+char oe;
+char ue;
+char ss;
+
+Statistic run(char solution[], char username[],  int with_time_limit);
+Statistic run_2player(char solution[], char player1[], char player2[]);
 void load_game(char solution[]);
 
 #endif //HANGMAN_GAME_H

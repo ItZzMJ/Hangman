@@ -45,7 +45,6 @@ char *get_solution() {
 
 int get_gamemode() {
     int gamemode,success = 0;
-    char ae = '\x84';
 
     printf("\t1 => 1 Spieler\n");
     printf("\t2 => 2 Spieler\n");
@@ -65,6 +64,17 @@ int get_gamemode() {
 
 }
 
+void print_statistic(Statistic statistic) {
+
+    printf("\n******* Statistik f%cr %s *******\n", ue, statistic.username);
+    printf("\tBen%ctigte Zeit:   %.2lfs\n", oe, statistic.time);
+    printf("\tRichtig geraten:  %d\n", statistic.success_count);
+    printf("\tFalsch geraten:   %d\n", statistic.error_count);
+    printf("\tZ%cge insgesamt:   %d\n", ue, statistic.error_count + statistic.success_count);
+
+
+}
+
 int main()
 {
     char *username;
@@ -72,6 +82,9 @@ int main()
     char *player1;
     char *player2;
     int gamemode;
+    int time_limit;
+    Statistic statistic;
+    Statistic statistics[2];//für zwei Spieler Statistik
 
     //Begrüßung
     printf("****************** Hangman ******************\n");
@@ -89,7 +102,10 @@ int main()
             solution = get_solution();
 
             //Spiel start
-            run(solution);
+            statistic = run(solution, username, 0);
+
+            //Ausgabe der Staistik und des Highscores
+            print_statistic(statistic);
             break;
         case 2:
             //Eingabe der Spielernamen
@@ -100,29 +116,30 @@ int main()
             solution = get_solution();
 
             //Spiel start
-            run_2player(solution, player1, player2);
+//            statistics = run_2player(solution, player1, player2);
+//            print_statistic(statistics[0]);
+//            print_statistic(statistics[1]);
             break;
         case 3:
+            //Eingabe der Spielernamen
+            username = get_username(0);
+
+            //Auswahl des Lösungswortes
+            solution = get_solution();
+
+            time_limit = 60;
+
+            //Spiel start
+            statistic = run(solution, username, time_limit);
+
+            //Ausgabe der Staistik und des Highscores
+            print_statistic(statistic);
             break;
         default:
             break;
     }
-    //Eingabe des Spielernamens
-    //username = get_username();
 
 
-    //printf("\t\n Username ist: %s\n", username);
-
-    //Auswahl des Lösungswortes
-    //solution = get_solution();
-
-    //printf("\tL%csungswort ist: %s \n",oe ,solution);
-
-    //Spiel start
-    //run(solution);
-        //extra Spiel methode run
-
-    //Ausgabe der Staistik und des Highscores
 
     //speichern der aktualisierten Highscore datei
 

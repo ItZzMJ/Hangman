@@ -7,9 +7,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include "game.h"
 
 char progress[128];
 char used_letters[30];
+int time_limit = 0;
 clock_t tstart;
 
 //Umlaute
@@ -105,7 +107,6 @@ int is_game_finished() {
 }
 
 void print_game(error_count) {
-    double time = 0.0;
     system("cls"); // clear console
 
     char hangman[8][150] = {
@@ -169,9 +170,7 @@ void print_game(error_count) {
 
     printf("****************** Hangman ******************\n");
 
-    time += clock() -tstart;
-    time = time/CLOCKS_PER_SEC;
-    printf("\t\t\t\t Zeit: %.2lfs\n", time);
+    print_time();
 
     printf("%s", hangman[error_count]);
 
@@ -194,6 +193,32 @@ void print_game(error_count) {
 
 }
 
+void print_time() {
+    double time = 0.0;
+    double time_left = 0.0;
+
+    time += clock() -tstart;
+    time = time/CLOCKS_PER_SEC;
+
+    //richtige Einrückung festlegen um beide Zeiten passend zu positionieren
+    if(time < 10) {
+        printf("\t\t\t\t Zeit:  %.2lfs\n", time);
+    } else {
+        printf("\t\t\t\t Zeit: %.2lfs\n", time);
+    }
+
+
+    if(time_limit != 0) {
+        time_left = time_limit - time;
+        if(time_left < 10 && time > 0) {
+            printf("\t\t    verlbeibende Zeit:  %.2lfs\n", time_left);
+        } else {
+            printf("\t\t    verlbeibende Zeit: %.2lfs\n", time_left);
+
+        }
+    }
+}
+
 void translate_to_progress(char solution[]) {
     for (int i = 0; i < strlen(solution); i++) {
         if (solution[i] == ' ') {
@@ -211,13 +236,32 @@ void translate_to_progress(char solution[]) {
     }
 }
 
+int is_time_over(){
+    double time = 0.0;
+    time += clock() -tstart;
+    time = time/CLOCKS_PER_SEC;
 
-int run(char solution[]) {
+    //überprüfe ob es ein Zeitlimit gibt
+    if(time_limit == 0) {
+        return 0;
+
+    } else if(time <= time_limit) {
+        return 0;
+    } else {
+        return 1; // Zeit ist vorbei
+    }
+
+}
+
+
+Statistic run(char solution[], char username[], int with_time_limit) {
     int game_finished = 0; // ist das Spiel beendet?
     char input_char;
     int error_count = 0;
     int input_count = 0;
-    double time1 = 0.0;
+    double time = 0.0;
+    Statistic statistic;
+    time_limit = with_time_limit;
     tstart = clock(); //Zeitmessung starten
 
     //Lösungswort in Unterstriche übersetzen
@@ -246,31 +290,49 @@ int run(char solution[]) {
         //Spiel layout anhand des Buchstabens ändern
         print_game(error_count);
 
+        //Überprüfe ob Zeitlimit überschritten wurde
+        if(is_time_over()) {
+            time += clock() -tstart;
+            time = time/CLOCKS_PER_SEC;
+            printf("\tDu hast verloren! Zeitlimit wurde %cberschritten!\n", ue);
+            //printf("\tGebrauchte Zeit: %.2lfs\n", time);
+            game_finished = 1;
+        }
+
 
         //check ob das spiel beendet ist
         if(error_count >= 7) {
-            time1 += clock() -tstart;
-            time1 = time1/CLOCKS_PER_SEC;
+            time += clock() -tstart;
+            time = time/CLOCKS_PER_SEC;
             printf("\tDu bist Tod! Spiel wird beendet.. \n");
-            printf("\tGebrauchte Zeit: %.2lfs\n", time1);
+            printf("\tGebrauchte Zeit: %.2lfs\n", time);
             game_finished = 1;
 
         } else if(is_game_finished()) {
-            time1 += clock() -tstart;
-            time1 = time1/CLOCKS_PER_SEC;
+            time += clock() -tstart;
+            time = time/CLOCKS_PER_SEC;
             printf("\tDu gewinnst!! Spiel wird beendet..\n");
-            printf("\tGebrauchte Zeit: %.2lfs\n", time1);
+            printf("\tGebrauchte Zeit: %.2lfs\n", time);
             game_finished = 1;
         }
 
 
     } while (game_finished == 0);
 
+    for(int i = 0; i < strlen(username); i++) {
+        statistic.username[i] = username[i];
+    }
+    statistic.username[strlen(username)] = 0;
 
-    return 0;
+    statistic.success_count = input_count - error_count;
+    statistic.error_count = error_count;
+    statistic.time = time;
+
+
+    return statistic;
 }
 
-int run_2player(char solution[], char player1[], char player2[]) {
+Statistic run_2player(char solution[], char player1[], char player2[]) {
     int game_finished = 0; // ist das Spiel beendet?
     char input_char;
     int player1_error_count = 0;
@@ -282,7 +344,11 @@ int run_2player(char solution[], char player1[], char player2[]) {
     int player1_success_count = 0;
     int player2_success_count = 0;
     int active_player = 1;
+    int winner = 0;
     double time1 = 0.0;
+    Statistic player1_statistic;
+    Statistic player2_statistic;
+
     tstart = clock(); //Zeitmessung starten
 
     //Lösungswort in Unterstriche übersetzen
@@ -337,6 +403,7 @@ int run_2player(char solution[], char player1[], char player2[]) {
 
 
             printf("\tIhr seid Tod! Spiel wird beendet.. \n");
+            winner = 0; //Niemand gewinnt
 
             game_finished = 1;
 
@@ -348,26 +415,56 @@ int run_2player(char solution[], char player1[], char player2[]) {
 
             if(player1_success_count > player2_success_count) {
                 printf("\t%s gewinnt!! Spiel wird beendet..\n", player1);
+                winner = 1; //Spieler 1 gewinnt
+
             } else if(player1_success_count < player2_success_count) {
                 printf("\t%s gewinnt!! Spiel wird beendet..\n", player2);
+                winner = 2; //Spieler 2 gewinnt
+
             } else {
                 printf("\tUnentschieden!! Spiel wird beendet..\n");
+                winner = 3; //Unentschieden  TODO: gewinner der das wort löst ??
             }
 
             game_finished = 1;
         }
     } while (game_finished == 0);
 
-    //Statistik
-    printf("\tGebrauchte Zeit: %.2lfs\n\n", time1);
+//    *statistics[0]->error_count = player1_error_count;
+//    *statistics[0]->success_count = player1_success_count;
+//    *statistics[0]->time = time1;
+//    if(winner == 1) {
+//        *statistics[0]->success = 1;
+//    } else {
+//        *statistics[0]->success = 1;
+//    }
 
-    printf("\tSpielerstatistik: \n");
-    printf("\t%s:\n", player1);
-    printf("\tFalsche Buchstaben: %d\n", player1_error_count);
-    printf("\tRichtige Buchstaben: %d\n\n", player1_input_count - player1_error_count);
 
-    printf("\t%s:\n", player2);
-    printf("\tFalsche Buchstaben: %d\n", player2_error_count);
-    printf("\tRichtige Buchstaben: %d\n", player2_input_count - player2_error_count);
+//    //Statistik Spieler 1
+//    strcpy(player1_statistic.username, player1);
+//    //player1_statistic.username = player1;
+//    player1_statistic.error_count = player1_error_count;
+//    player1_statistic.success_count = player1_input_count - player1_error_count;
+//    player1_statistic.time = time1;
+//    if(winner == 1) {
+//        player1_statistic.success = 1;
+//    } else {
+//        player1_statistic.success = 0;
+//    }
+//
+//    //Statistik Spieler 2
+//    strcpy(player2_statistic.username, player2);
+//    //player2_statistic.username = player2;
+//    player2_statistic.error_count = player2_error_count;
+//    player2_statistic.success_count = player2_input_count - player2_error_count;
+//    player2_statistic.time = time1;
+//    if(winner == 2) {
+//        player2_statistic.success = 1;
+//    } else {
+//        player2_statistic.success = 0;
+//    }
+//
+//    Statistic statistics[2] = {player1_statistic, player2_statistic};
+//    return statistics;
 
 }
