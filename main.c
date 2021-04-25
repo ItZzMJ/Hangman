@@ -73,13 +73,14 @@ char *get_username(int player) {
 /* Hilfsfunktion für get_suggestions_position
  * Sucht die Postion eines Teilstrings heraus und gibt diese zurück
  */
-int strpos(char *src, char *search, int start) {
-   char max[strlen(src)];
-   strncpy(max, src+start, strlen(src)-start);
-   char *position = strstr(max, search);
-   if (position)
-      return position - max+start;
-   return 0;
+int strpos(char *src, char *search) {
+    char max[strlen(src)];
+    strncpy(max, src, strlen(src));
+    char *position = strstr(max, search);
+    if (position) {
+        return position - max;
+    }
+    return 0;
 }
 
 /* Sucht die Postion eines Teilstrings heraus und gibt dann die Postition des Wortanfangs zurück
@@ -91,7 +92,7 @@ int get_suggestions_position(char playername[128]) {
     FILE *names_file = fopen("playernames.txt","r");
     while(fgets(line,LENGTH,names_file)) {
         if(strstr(line, playername) != NULL) {
-            position = strpos(line, playername, 0);
+            position = strpos(line, playername);
             for(int i = position; line[i-1] != 13; i--) {
                 if(i == 0) {
                     position = 0;
@@ -162,7 +163,6 @@ void get_solution() {
     for(int i = 0; i < strlen(words[random_index]); i++) {
         solution[i] = words[random_index][i];
     }
-    printf("%s", solution);
     fclose(word_list);
 }
 
