@@ -1,0 +1,64 @@
+- Spielstand
+- Buchstaben tippen
+- bisher getippte Buchstaben
+- spiel gewonnen oder verloren?
+- Sicher verarbeitung von Eingaben
+- Zeitmessung
+- Statistik
+- Spielernamen angeben und als datei speichern
+- Grafische Darstellung
+- Lösewörter aus datei + verschlüsseln
+- Spielen gegen zeit
+- Highscore liste speichern (csv datei)
+- Zwei Spieler (mit abwechseln)
+
+HANGMANPICS = ['''
+  +---+
+  |   |
+      |
+      |
+      |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+ /|\  |
+      |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+ /|\  |
+ /    |
+      |
+=========''', '''
+  +---+
+  |   |
+  O   |
+ /|\  |
+ / \  |
+      |
+=========''']
