@@ -390,6 +390,8 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     double time1 = 0.0;
     Statistic player1_statistic;
     Statistic player2_statistic;
+    Statistic *statistics = malloc(sizeof(Statistic) * 2);
+
 
     tstart = clock(); //Zeitmessung starten
 
@@ -477,32 +479,41 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
         }
     } while (game_finished == 0);
 
+    //TODO:
+
 
     //Statistik Spieler 1
-    strcpy(player1_statistic.username, player1);
-    //player1_statistic.username = player1;
-    player1_statistic.error_count = player1_error_count;
-    player1_statistic.success_count = player1_input_count - player1_error_count;
-    player1_statistic.time = time1;
+    //Statistik speichern und zurückgeben
+    for(int i=0; i< strlen(player1); i++) {
+        statistics[0].username[i] = player1[i];
+    }
+    statistics[0].username[strlen(player1)] = '\0';
+
+    //statistics[0].username = player1;
+    statistics[0].error_count = player1_error_count;
+    statistics[0].success_count = player1_input_count - player1_error_count;
+    statistics[0].time = time1;
     if(winner == 1) {
-        player1_statistic.success = 1;
+        statistics[0].success = 1;
     } else {
-        player1_statistic.success = 0;
+        statistics[0].success = 0;
     }
 
     //Statistik Spieler 2
-    strcpy(player2_statistic.username, player2);
-    //player2_statistic.username = player2;
-    player2_statistic.error_count = player2_error_count;
-    player2_statistic.success_count = player2_input_count - player2_error_count;
-    player2_statistic.time = time1;
-    if(winner == 2) {
-        player2_statistic.success = 1;
-    } else {
-        player2_statistic.success = 0;
+    for(int i=0; i< strlen(player2); i++) {
+        statistics[1].username[i] = player2[i];
     }
-    //TODO:
-    Statistic *statistics = malloc(sizeof(Statistic) * 2);
+    statistics[1].username[strlen(player2)] = '\0';
+
+    //statistics[1].username = player2;
+    statistics[1].error_count = player2_error_count;
+    statistics[1].success_count = player2_input_count - player2_error_count;
+    statistics[1].time = time1;
+    if(winner == 2) {
+        statistics[1].success = 1;
+    } else {
+        statistics[1].success = 0;
+    }
     statistics[0] = player1_statistic;
     statistics[1] = player2_statistic;
 
