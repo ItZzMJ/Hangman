@@ -137,6 +137,7 @@ int string_contains_char(char string[], char input_char){
     for(int i = 0; i < strlen(string); i++) {
         if(tolower(string[i]) == input_char) {
             return 1; // String enthählt den eingegebenen Buchstaben
+
         }
     }
 
@@ -360,6 +361,7 @@ Statistic run(char solution[128], char username[], int with_time_limit) {
     char input_char;
     int error_count = 0;
     int input_count = 0;
+    int success_count = 0;
     double time = 0.0;
     Statistic statistic;
     time_limit = with_time_limit;
@@ -388,6 +390,7 @@ Statistic run(char solution[128], char username[], int with_time_limit) {
             error_count++;
         }
 
+
         //Spiel layout anhand des Buchstabens ändern
         print_game(error_count);
 
@@ -407,6 +410,9 @@ Statistic run(char solution[128], char username[], int with_time_limit) {
             time = time/CLOCKS_PER_SEC;
             printf("\tDu bist Tod! Spiel wird beendet.. \n");
             printf("\tGebrauchte Zeit: %.2lfs\n", time);
+            printf("\tIngesamt gebrauchte Versuche: %d\n", input_count);
+            printf("\tAnzahl der falschen Versuche: %d\n", error_count);
+            printf("\tAnzahl der richtigen Versuche: %d\n", input_count - error_count );
             game_finished = 1;
 
         } else if(is_game_finished()) {
@@ -414,6 +420,9 @@ Statistic run(char solution[128], char username[], int with_time_limit) {
             time = time/CLOCKS_PER_SEC;
             printf("\tDu gewinnst!! Spiel wird beendet..\n");
             printf("\tGebrauchte Zeit: %.2lfs\n", time);
+            printf("\tIngesamt gebrauchte Versuche: %d\n", input_count);
+            printf("\tAnzahl der falschen Versuche: %d\n", error_count);
+            printf("\tAnzahl der richtigen Versuche: %d\n", input_count - error_count );
             game_finished = 1;
         }
 
@@ -504,6 +513,15 @@ Statistic run_2player(char solution[], char player1[], char player2[]) {
 
 
             printf("\tIhr seid Tod! Spiel wird beendet.. \n");
+
+            printf("\tAnzahl der Versuche von %s: %d\n", player1 , player1_input_count);
+            printf("\tAnzahl der falschen Versuche von %s: %d\n", player1 , player1_error_count);
+            printf("\tAnzahl der richtigen Versuche von %s: %d\n", player1 , player1_input_count - player1_error_count);
+
+            printf("\tAnzahl der Versuche von %s: %d\n", player2 , player2_input_count);
+            printf("\tAnzahl der falschen Versuche von %s: %d\n", player2 , player2_error_count);
+            printf("\tAnzahl der richtigen Versuche von %s: %d\n", player2 , player2_input_count - player2_error_count);
+
             winner = 0; //Niemand gewinnt
 
             game_finished = 1;
@@ -516,14 +534,38 @@ Statistic run_2player(char solution[], char player1[], char player2[]) {
 
             if(player1_success_count > player2_success_count) {
                 printf("\t%s gewinnt!! Spiel wird beendet..\n", player1);
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player1 , player1_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player1 , player1_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player1 , player1_success_count);
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player2 , player2_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player2 , player2_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player2 , player2_success_count);
                 winner = 1; //Spieler 1 gewinnt
 
             } else if(player1_success_count < player2_success_count) {
                 printf("\t%s gewinnt!! Spiel wird beendet..\n", player2);
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player1 , player1_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player1 , player1_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player1 , player1_success_count);
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player2 , player2_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player2 , player2_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player2 , player2_success_count);
                 winner = 2; //Spieler 2 gewinnt
 
             } else {
                 printf("\tUnentschieden!! Spiel wird beendet..\n");
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player1 , player1_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player1 , player1_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player1 , player1_success_count);
+
+                printf("\tAnzahl der Versuche von %s: %d\n", player2 , player2_input_count);
+                printf("\tAnzahl der falschen Versuche von %s: %d\n", player2 , player2_error_count);
+                printf("\tAnzahl der richtigen Versuche von %s: %d\n", player2 , player2_success_count);
                 winner = 3; //Unentschieden  TODO: gewinner der das wort löst ??
             }
 
