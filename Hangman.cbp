@@ -38,6 +38,8 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="playernames.txt" />
+		<Unit filename="words.txt" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
