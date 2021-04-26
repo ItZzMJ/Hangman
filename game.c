@@ -9,6 +9,8 @@
 #include <time.h>
 #include "game.h"
 
+#define KEY 5
+
 char progress[128];
 char used_letters[30];
 int time_limit = 0;
@@ -19,6 +21,105 @@ char ae = '\x84';
 char oe = '\x94';
 char ue = '\x81';
 char ss = '\xE1';
+
+//Verschlüsselung der Wörterdatei
+void decyrption()
+{
+   char words;
+
+   //Lesen der Wörterdatei
+   FILE *fpdo = fopen("words.txt","r");
+
+   //Schreiben in eine Temporäre Datei
+   FILE *fpdotp = fopen("tmp.txt","w");
+
+   while(1)
+   {
+       words = fgetc(fpdo);
+       if(words == EOF)
+       {
+           break;
+       }
+       else
+       {
+           //Verschrieben der Buchstaben in den Wörtern um 5 nach vorne
+           words = words+KEY;
+           fputc(words,fpdotp);
+       }
+   }
+   fclose(fpdo);
+   fclose(fpdotp);
+
+   fpdo=fopen("Words.txt","w");
+
+   fpdotp=fopen("tmp.txt","r");
+
+   while(1)
+   {
+
+   words = fgetc(fpdotp);
+   if(words == EOF)
+   {
+       break;
+   }
+   else
+   {
+       fputc(words, fpdo);
+   }
+   }
+   fclose(fpdo);
+   fclose(fpdotp);
+}
+
+
+//Entschlüsselung der Wörter
+void encyrption()
+{
+ char words;
+
+  //Lesen der Wörterdatei
+  FILE *solution_words = fopen("words.txt","r");
+
+   //Schreiben in eine Temporäre Datei
+   FILE *temp_words = fopen("tmp.txt","w");
+
+   while(1)
+   {
+       words = fgetc(solution_words);
+       if(words == EOF)
+       {
+           break;
+       }
+       else
+       {
+           //Einzelne Buchstaben werden um 5 Buchstaben nach hinten zurück verschoben
+           words = words-KEY;
+           fputc(words,temp_words);
+       }
+   }
+   fclose(solution_words);
+   fclose(temp_words);
+
+   solution_words=fopen("Words.txt","w");
+
+   temp_words=fopen("tmp.txt","r");
+
+   while(1)
+   {
+
+   words = fgetc(temp_words);
+   if(words == EOF)
+   {
+       break;
+   }
+   else
+   {
+       fputc(words, solution_words);
+   }
+   }
+   fclose(solution_words);
+   fclose(temp_words);
+}
 
 void print_progress() {
     printf("\n\t\t");

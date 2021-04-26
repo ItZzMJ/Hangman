@@ -39,6 +39,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="playernames.txt" />
+		<Unit filename="tmp.txt">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="words.txt" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

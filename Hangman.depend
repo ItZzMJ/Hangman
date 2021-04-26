@@ -17,3 +17,21 @@
 	<string.h>
 	"game.h"
 
+1619427871 source:c:\users\goldmann\documents\github\hangman\main.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	"game.h"
+
+1619427608 c:\users\goldmann\documents\github\hangman\game.h
+
+1619427897 source:c:\users\goldmann\documents\github\hangman\game.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<time.h>
+	"game.h"
+

@@ -217,8 +217,14 @@ int main()
             //Eingabe des Spielernamens
             username = get_username(0);
 
+            //Entschlüsselung der Wörterliste
+            encyrption();
+
             //Auswahl des Lösungswortes
             get_solution(&solution);
+
+            //Verschlüsselung der Wörterliste
+            decyrption();
 
             //Spiel start
             statistic = run(solution, username, 0);
@@ -231,8 +237,14 @@ int main()
             player1 = get_username(1);
             player2 = get_username(2);
 
+            //Entschlüsselung der Wörterliste
+            encyrption();
+
             //Auswahl des Lösungswortes
             get_solution(&solution);
+
+            //Verschlüsselung der Wörterliste
+            decyrption();
 
             //Spiel start
 //            statistics = run_2player(solution, player1, player2);
@@ -243,8 +255,14 @@ int main()
             //Eingabe der Spielernamen
             username = get_username(0);
 
+            //Entschlüsselung der Wörterliste
+            encyrption();
+
             //Auswahl des Lösungswortes
             get_solution(&solution);
+
+            //Verschlüsselung der Wörterliste
+            decyrption();
 
             time_limit = 60;
 
@@ -261,7 +279,6 @@ int main()
 
 
     //speichern der aktualisierten Highscore datei
-
 
 
 
