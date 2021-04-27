@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include <windows.h>
 #include "game.h"
 
 #define LENGTH 255
@@ -156,6 +157,22 @@ void write_username_to_file(char playername[128]){
     }
 }
 
+/*
+ * ändert die Farbe der Konsolenausgabe
+ */
+void SetConsoleColourActive()
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED);
+}
+
+/*
+ * setzt die Farbe der Konsolenausgabe zurück
+ */
+void ResetConsoleColour()
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+}
+
 void get_solution() {
     char words[WORDS][LENGTH];
     int count = 0;
@@ -180,42 +197,98 @@ void get_solution() {
 
 int get_gamemode() {
 
-    //int selection = 0;
-    //print_gamemode_selection(selection);
-    int gamemode,success = 0;
+    int ch1, ch2;
+    int selection = 1;
 
-    printf("\t1 => 1 Spieler\n");
-    printf("\t2 => 2 Spieler\n");
-    printf("\t3 => 1 Spieler gegen Zeit\n");
-    printf("\tBitte w%chlen Sie einen Spielmodus: ", ae);
-    do {
-        success = 0;
-        scanf("%d", &gamemode);
-        fflush(stdin);
+    print_gamemode_selection(selection);
 
-        if(gamemode < 1 ||gamemode > 3) {
-            success = 1;
-            printf("\tDer Spielmodus muss zwischen 1 und 3 liegen! Versuch's nochmal: ");
+    //Menü-Schleife
+    while(1 == 1) {
+        ch1 = getch();
+        ch2 = 0;
+        if (ch1 == 0xE0) { // eine Scrolltaste wurde gedrückt
+            ch2 = getch();
+            //entscheide welche scrolltaste
+            switch(ch2)
+            {
+                case 72: //Pfeiltaste nach oben
+                    //printf("UP WAS PRESSED\n");
+                    if(selection > 1) {
+                        selection--;
+                    }
+                    print_gamemode_selection(selection);
+
+                    break;
+
+                case 80: //Pfeiltaste nach unten
+                    //printf("DOWN WAS PRESSED\n");
+                    if(selection < 3) {
+                        selection++;
+                    }
+                    print_gamemode_selection(selection);
+                    break;
+
+                default:
+                    break;
+            }
+        } else if(ch1 == 13) {
+            break;
         }
-
-    } while(success == 1);
-
-    return gamemode;
+    }
+    return selection;
 }
 
+void print_header() {
+    printf(" _                                             \n"
+           "| |                                            \n"
+           "| |__   __ _ _ __   __ _ _ __ ___   __ _ _ __  \n"
+           "| '_ \\ / _` | '_ \\ / _` | '_ ` _ \\ / _` | '_ \\ \n"
+           "| | | | (_| | | | | (_| | | | | | | (_| | | | |\n"
+           "|_| |_|\\__,_|_| |_|\\__, |_| |_| |_|\\__,_|_| |_|\n"
+           "                    __/ |                      \n"
+           "                   |___/                       \n");
+}
 
+/*
+ * Gib das Menü
+ */
+void print_gamemode_selection(int selection) {
+    system("cls");
+    print_header();
+    printf("Navigation mit den Pfeiltasten\n", selection);
+    printf("\n\n\t");
+
+    if(selection == 1) {
+        SetConsoleColourActive();
+    }
+    printf("1 Spieler\n\t");
+    ResetConsoleColour();
+
+    if(selection == 2) {
+        SetConsoleColourActive();
+    }
+    printf("2 Spieler\n\t");
+    ResetConsoleColour();
+
+    if(selection == 3) {
+        SetConsoleColourActive();
+    }
+    printf("1 Spieler gegen Zeit\n");
+    ResetConsoleColour();
+
+}
 
 /*
  * Gib Statistiken aus
  */
 void print_statistic(Statistic statistic) {
 
-    printf("\n******* Statistik f%cr %s", ue, statistic.username);
+    printf("\n\t******* Statistik f%cr %s", ue, statistic.username);
     printf(" *******\n");
-    printf("\tBen%ctigte Zeit:   %.2lfs\n", oe, statistic.time);
-    printf("\tRichtig geraten:  %d\n", statistic.success_count);
-    printf("\tFalsch geraten:   %d\n", statistic.error_count);
-    printf("\tZ%cge insgesamt:   %d\n", ue, statistic.error_count + statistic.success_count);
+    printf("\t\tBen%ctigte Zeit:   %.2lfs\n", oe, statistic.time);
+    printf("\t\tRichtig geraten:  %d\n", statistic.success_count);
+    printf("\t\tFalsch geraten:   %d\n", statistic.error_count);
+    printf("\t\tZ%cge insgesamt:   %d\n\t", ue, statistic.error_count + statistic.success_count);
 
     //passende Anzahl an Sternchen ausgeben um die gleiche Länge der Überschrift haben
     for(int i = 0; i < strlen(statistic.username) + 30; i++) {
@@ -282,6 +355,7 @@ void save_statistic(Statistic statistic) {
     t = time(NULL);
     ts = localtime(&t);
 
+    //Daten in die Dateischreiben
     fprintf(file, "%d; %s; %d; %d; %d; %d; %.2lf; %s; %d; %d-%d-%d\n",
             id,
             statistic.username,
@@ -296,27 +370,56 @@ void save_statistic(Statistic statistic) {
             );
     fclose(file);
 
-    printf("Statistik erfolgreich gespeichert!\n");
+    printf("\tStatistik erfolgreich gespeichert!\n");
 
 }
 
-int main()
+void print_main_menu(int selection) {
+    system("cls");
+    print_header();
+    printf("\nNavigation mit den Pfeiltasten\n\n\t");
+
+    if(selection == 0) {
+        SetConsoleColourActive();
+    }
+    printf("Spielen\n\t");
+    ResetConsoleColour();
+
+
+    if(selection == 1) {
+        SetConsoleColourActive();
+    }
+    printf("Highscoreliste anzeigen\n");
+    ResetConsoleColour();
+
+}
+
+print_highscorelist() {
+    //TODO:
+}
+
+void read_highscorelist() {
+    //TODO:
+}
+
+void show_highscores() {
+    //TODO:
+}
+
+int run_game()
 {
 
     char *username;
     char *player1;
     char *player2;
-    int gamemode;
-    int time_limit;
+    int gamemode = 0;
+    int time_limit = 0;
     Statistic statistic;
     Statistic *statistics; //für zwei Spieler Statistik
 
-    //Begrüßung
-    printf("****************** Hangman ******************\n");
-    printf("\n\n");
-
     //Auswahl des Spielmodus
     gamemode = get_gamemode();
+
 
     switch (gamemode) {
         case 1:
@@ -370,7 +473,7 @@ int main()
 
 
 
-    if(gamemode == 1 ||gamemode == 3) {
+    if(gamemode == 1 || gamemode == 3) {
         //Ausgabe der Staistik und des Highscores
         print_statistic(statistic);
 
@@ -378,7 +481,51 @@ int main()
         save_statistic(statistic);
     }
 
+    return 0;
+}
 
+int main() {
+    int selection = 0;
+    int ch1, ch2;
+    print_main_menu(selection);
+
+    //Menü-Schleife
+    while(1 == 1) {
+        ch1 = getch();
+        ch2 = 0;
+        if (ch1 == 0xE0) { // eine Scrolltaste wurde gedrückt
+            ch2 = getch();
+            //entscheide welche scrolltaste
+            switch(ch2)
+            {
+                case 72: //Pfeiltaste nach oben
+                    if(selection == 1) {
+                        selection--;
+                    }
+                    print_main_menu(selection);
+
+                    break;
+
+                case 80: //Pfeiltaste nach unten
+                    if(selection == 0) {
+                        selection++;
+                    }
+                    print_main_menu(selection);
+                    break;
+
+                default:
+                    break;
+            }
+        } else if(ch1 == 13) {
+            break;
+        }
+    }
+
+    if(selection == 0) {
+        run_game();
+    } else if(selection == 1) {
+        show_highscores();
+    }
 
     return 0;
 }

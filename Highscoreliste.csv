@@ -1,3 +1,14 @@
 ID; name; mode; input_count; success_count; error_count; time; solution; win; date
 1; Jannik; 1; 12; 12; 0; 9.62; Schaukelpferd; 1; 2021-3-27
 2; Armin; 1; 13; 6; 7; 8.21; Versuchskaninchen; 0; 2021-3-27
+3; Jannik; 1; 16; 10; 6; 62.79; Weihnachtsgans; 1; 2021-3-27
+4; Jannik; 1; 10; 7; 3; 19.64; Glatteis; 1; 2021-3-27
+5; Jannik; 1; 13; 9; 4; 27.75; Zentralbank; 1; 2021-3-27
+6; Jannik; 1; 13; 9; 4; 42.82; Sprudelwasser; 1; 2021-3-27
+7; Jannik; 2; 6; 2; 4; 12.73; Falschgeld; 0; 2021-3-27
+8; Armin; 2; 6; 3; 3; 29.51; Falschgeld; 0; 2021-3-27
+9; k; 1; 9; 2; 7; 376.75; Tier; 0; 2021-3-27
+10; Jannik; 1; 13; 6; 7; 51.52; Kichstarter; 0; 2021-3-27
+11; Jannik; 1; 4; 4; 0; 5.49; Baum; 1; 2021-3-27
+12; j; 1; 14; 9; 5; 16.99; Sprudelwasser; 1; 2021-3-27
+13; j; 1; 13; 11; 2; 20.14; Verhaltensmuster; 1; 2021-3-27

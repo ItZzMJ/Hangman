@@ -176,7 +176,7 @@ void print_game(error_count) {
             "\t\t=========\n"
     };
 
-    printf("****************** Hangman ******************\n");
+    printf("********************** Hangman **********************\n");
 
     print_time();
 
@@ -210,18 +210,18 @@ void print_time() {
 
     //richtige Einrückung festlegen um beide Zeiten passend zu positionieren
     if(time < 10) {
-        printf("\t\t\t\t Zeit:  %.2lfs\n", time);
+        printf("\t\t\t\t\t Zeit:  %.2lfs\n", time);
     } else {
-        printf("\t\t\t\t Zeit: %.2lfs\n", time);
+        printf("\t\t\t\t\t Zeit: %.2lfs\n", time);
     }
 
 
     if(time_limit != 0) {
         time_left = time_limit - time;
         if(time_left < 10 && time > 0) {
-            printf("\t\t    verlbeibende Zeit:  %.2lfs\n", time_left);
+            printf("\t\t\t    verlbeibende Zeit:  %.2lfs\n", time_left);
         } else {
-            printf("\t\t    verlbeibende Zeit: %.2lfs\n", time_left);
+            printf("\t\t\t    verlbeibende Zeit: %.2lfs\n", time_left);
 
         }
     }
@@ -259,6 +259,77 @@ int is_time_over(){
         return 1; // Zeit ist vorbei
     }
 
+}
+
+void print_endscreen(int game_won) {
+    system("cls");
+    if(game_won == 1) {
+        printf("           ________________\n"
+               "      .---'::'             `---.\n"
+               "     (::::::'                   )\n"
+               "     |`-----.____________.-----'|\n"
+               "     |                   :::::::|\n"
+               "    .|                    ::::::!-.\n"
+               "    \\|                    :::::/|/\n"
+               "     |                      ::::|\n"
+               "     |   Special Flonk Award :::|\n"
+               "     |      for Silliness   ::::|\n"
+               "     |                    ::::::|\n"
+               "     |                   .::::::|\n"
+               "     J                   :::::::F\n"
+               "      \\                 :::::::/\n"
+               "       `.             .:::::::'\n"
+               "         `-._       .::::::-'\n"
+               "             |       \"\"\"|\"\n"
+               "             |       :::|\n"
+               "             F        ::J\n"
+               "            /          ::\\\n"
+               "       __.-'           :::`-.__\n"
+               "      (_                ::::::_)\n"
+               "        `\"\"\"--------------\"\"\"'\n");
+
+        printf("__     ______  _    _  __          _______ _   _   _ \n"
+               "\\ \\   / / __ \\| |  | | \\ \\        / /_   _| \\ | | | |\n"
+               " \\ \\_/ / |  | | |  | |  \\ \\  /\\  / /  | | |  \\| | | |\n"
+               "  \\   /| |  | | |  | |   \\ \\/  \\/ /   | | | . ` | | |\n"
+               "   | | | |__| | |__| |    \\  /\\  /   _| |_| |\\  | |_|\n"
+               "   |_|  \\____/ \\____/      \\/  \\/   |_____|_| \\_| (_)\n"
+               "\n");
+
+    } else if(game_won == 0) {
+        printf("               ...\n"
+               "             ;::::;\n"
+               "           ;::::; :;\n"
+               "         ;:::::'   :;\n"
+               "        ;:::::;     ;.\n"
+               "       ,:::::'       ;           OOO\\\n"
+               "       ::::::;       ;          OOOOO\\\n"
+               "       ;:::::;       ;         OOOOOOOO\n"
+               "      ,;::::::;     ;'         / OOOOOOO\n"
+               "    ;:::::::::`. ,,,;.        /  / DOOOOOO\n"
+               "  .';:::::::::::::::::;,     /  /     DOOOO\n"
+               " ,::::::;::::::;;;;::::;,   /  /        DOOO\n"
+               ";`::::::`'::::::;;;::::: ,#/  /          DOOO\n"
+               ":`:::::::`;::::::;;::: ;::#  /            DOOO\n"
+               "::`:::::::`;:::::::: ;::::# /              DOO\n"
+               "`:`:::::::`;:::::: ;::::::#/               DOO\n"
+               " :::`:::::::`;; ;:::::::::##                OO\n"
+               " ::::`:::::::`;::::::::;:::#                OO\n"
+               " `:::::`::::::::::::;'`:;::#                O\n"
+               "  `:::::`::::::::;' /  / `:#\n"
+               "   ::::::`:::::;'  /  /   `#\n");
+
+        printf("__     ______  _    _   _      ____   _____ ______ _ \n"
+               "\\ \\   / / __ \\| |  | | | |    / __ \\ / ____|  ____| |\n"
+               " \\ \\_/ / |  | | |  | | | |   | |  | | (___ | |__  | |\n"
+               "  \\   /| |  | | |  | | | |   | |  | |\\___ \\|  __| | |\n"
+               "   | | | |__| | |__| | | |___| |__| |____) | |____|_|\n"
+               "   |_|  \\____/ \\____/  |______\\____/|_____/|______(_)\n"
+               "\n");
+    }
+
+    printf("\n\n\tbeliebigen Knopf dr%ccken\n", ue);
+    getch();
 }
 
 
@@ -346,6 +417,8 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     }
     statistic.solution[strlen(solution)] = '\0';
 
+
+    print_endscreen(game_won);
 
     return statistic;
 
@@ -451,7 +524,7 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
 
 
             printf("\tIhr seid Tod! Spiel wird beendet.. \n");
-            printf("Das L%csungswort war '%s'\n", oe, solution);
+            printf("\tDas L%csungswort war '%s'\n", oe, solution);
             winner = 0; //Niemand gewinnt
 
             game_finished = 1;
@@ -493,6 +566,8 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
             game_finished = 1;
         }
     } while (game_finished == 0);
+
+
 
     //Statistik Spieler 1
 
