@@ -13,7 +13,8 @@
 char progress[128];
 char used_letters[30];
 int time_limit = 0;
-clock_t tstart;
+clock_t game_start;
+//clock_t tstart;
 
 //Umlaute
 char ae = '\x84';
@@ -204,7 +205,7 @@ void print_time() {
     double time = 0.0;
     double time_left = 0.0;
 
-    time += clock() -tstart;
+    time += clock() - game_start;
     time = time/CLOCKS_PER_SEC;
 
     //richtige Einrückung festlegen um beide Zeiten passend zu positionieren
@@ -245,7 +246,7 @@ void translate_to_progress(char solution[]) {
 
 int is_time_over(){
     double time = 0.0;
-    time += clock() -tstart;
+    time += clock() -game_start;
     time = time/CLOCKS_PER_SEC;
 
     //überprüfe ob es ein Zeitlimit gibt
@@ -268,12 +269,10 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     int input_count = 0;
     double time = 0.0;
     int game_won = 0;
-
     Statistic statistic;
 
-
-    time_limit = with_time_limit;
-    tstart = clock(); //Zeitmessung starten
+    time_limit = with_time_limit; // Zeitlimit global setzen
+    game_start = clock(); //Zeitmessung starten
 
     //Lösungswort in Unterstriche übersetzen
     translate_to_progress(solution);
@@ -292,21 +291,18 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
         //check ob der Buchstabe im Lösungswort existiert
         if (string_contains_char(solution, input_char)) {
             update_progress(input_char, solution);
+
         } else {
             printf("\tBuchstabe nicht vorhanden!\n");
-
             error_count++;
         }
 
         //Spiel layout anhand des Buchstabens ändern
         print_game(error_count);
 
-        //TODO: remove
-        //printf("\n%s\n", solution);
-
         //Überprüfe ob Zeitlimit überschritten wurde
         if(is_time_over()) {
-            time += clock() -tstart;
+            time += clock() -game_start;
             time = time/CLOCKS_PER_SEC;
             printf("\tDu hast verloren! Zeitlimit wurde %cberschritten!\n", ue);
             game_finished = 1;
@@ -315,46 +311,21 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
 
         //check ob das spiel beendet ist
         if(error_count >= 7) {
-            time += clock() -tstart;
+            time += clock() -game_start;
             time = time/CLOCKS_PER_SEC;
             printf("\tDu bist Tod! Spiel wird beendet.. \n");
-            //printf("\tGebrauchte Zeit: %.2lfs\n", time);
             game_finished = 1;
 
         } else if(is_game_finished()) {
-            time += clock() -tstart;
+            time += clock() -game_start;
             time = time/CLOCKS_PER_SEC;
             printf("\tDu gewinnst!! Spiel wird beendet..\n");
-            //printf("\tGebrauchte Zeit: %.2lfs\n", time);
             game_finished = 1;
             game_won = 1;
         }
 
 
     } while (game_finished == 0);
-
-    //printf("\nSaving statistics..\n");
-
-//    for(int i = 0; i < strlen(username); i++) {
-//        printf("TEEEEST");
-//        statistic->username[i] = username[i];
-//        printf("S: %c; U: %c\n", statistic->username[i], username[i]);
-//    }
-//    statistic->username[strlen(username)] = 0;
-//
-//
-//    statistic->success_count = input_count - error_count;
-//    statistic->error_count = error_count;
-//    statistic->time = time;
-//    statistic->success = game_won;
-//    printf("\nSaving statistics data successfully..\n");
-//
-//
-//    if(with_time_limit == 0) {
-//        statistic->mode = 1;
-//    } else {
-//        statistic->mode = 3;
-//    }
 
 
     //Statistik speichern und zurückgeben
@@ -369,6 +340,12 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     statistic.success = game_won;
     statistic.mode = 1;
 
+    //Lösungswort für Statistik speichern
+    for(int i=0; i< strlen(solution); i++) {
+        statistic.solution[i] = solution[i];
+    }
+    statistic.solution[strlen(solution)] = '\0';
+
 
     return statistic;
 
@@ -377,6 +354,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
 Statistic * run_2player(char solution[], char player1[], char player2[]) {
     int game_finished = 0; // ist das Spiel beendet?
     char input_char;
+    int i = 0;
     int player1_error_count = 0;
     int player2_error_count = 0;
     int error_count = 0;
@@ -387,23 +365,29 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     int player2_success_count = 0;
     int active_player = 1;
     int winner = 0;
-    double time1 = 0.0;
-    Statistic player1_statistic;
-    Statistic player2_statistic;
+    double time = 0.0;
+    double time_player1 = 0.0;
+    double time_player2 = 0.0;
     Statistic *statistics = malloc(sizeof(Statistic) * 2);
+    clock_t tstart; //Startet irgendwie nicht bei 0?
 
-
-    tstart = clock(); //Zeitmessung starten
 
     //Lösungswort in Unterstriche übersetzen
     translate_to_progress(solution);
 
+    game_start = clock(); //globale Zeitmessung starten
+
     //Spielfeld ausgeben
     print_game(error_count);
 
+
+
     do {
-        // Buchstabe eingeben
+        tstart = clock(); //lokale Spieler Zeitmessung für einen Zug starten
+
         printf("\t");
+
+        //aktiven Spieler ausgeben und Zug mitzählen
         if(active_player == 1) {
             printf("%s", player1);
             player1_input_count++;
@@ -412,11 +396,10 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
             player2_input_count++;
         }
 
+        //Buchstabe eingeben
         printf(" Buchstaben eingeben: ");
         input_char = tolower(get_char());
 
-        //Anzahl der Züge erhöhen
-        input_count++;
 
         //check ob der Buchstabe im Lösungswort existiert
         if (string_contains_char(solution, input_char)) {
@@ -429,6 +412,7 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
             if(active_player == 1) {
                 player1_error_count++;
                 active_player = 2;
+
             } else {
                 player2_error_count++;
                 active_player = 1;
@@ -436,27 +420,57 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
 
         }
 
+        //Zeit für den Zug stoppen und speichern
+        if(active_player == 1) {
+            //Zeit für Spieler 1 anhalten
+            time += clock() - tstart;
+            time = time/CLOCKS_PER_SEC;
+            time_player1 += time;
+
+        } else {
+            //Zeit für Spieler 2 anhalten
+            time += clock() - tstart;
+            time = time/CLOCKS_PER_SEC;
+            time_player2 += time;
+        }
+
         //Spiel layout anhand des Buchstabens ändern
         print_game(error_count);
 
-
         //check ob das spiel beendet ist
         if(error_count >= 7) {
-            time1 += clock() -tstart;
-            time1 = time1/CLOCKS_PER_SEC;
+            time += clock() - tstart;
+            time = time/CLOCKS_PER_SEC;
+
+            //Zeit für den entsprechenden Spieler speichern
+            if(active_player == 1) {
+                time_player1 += time;
+            } else {
+                time_player2 += time;
+            }
 
 
             printf("\tIhr seid Tod! Spiel wird beendet.. \n");
+            printf("Das L%csungswort war '%s'\n", oe, solution);
             winner = 0; //Niemand gewinnt
 
             game_finished = 1;
 
         } else if(is_game_finished()) {
-            time1 += clock() -tstart;
-            time1 = time1/CLOCKS_PER_SEC;
+            time += clock() -tstart;
+            time = time/CLOCKS_PER_SEC;
+
+            //Zeit für den entsprechenden Spieler speichern
+            if(active_player == 1) {
+                time_player1 += time;
+            } else {
+                time_player2 += time;
+            }
+
             player1_success_count = player1_input_count - player1_error_count;
             player2_success_count = player2_input_count - player2_error_count;
 
+            //Entscheidung wer gewinnt nach richtrig geratenen Buchstaben
             if(player1_success_count > player2_success_count) {
                 printf("\t%s gewinnt!! Spiel wird beendet..\n", player1);
                 winner = 1; //Spieler 1 gewinnt
@@ -475,24 +489,31 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
                 }
             }
 
+            //Spiel ist beendet
             game_finished = 1;
         }
     } while (game_finished == 0);
 
-    //TODO:
-
-
     //Statistik Spieler 1
-    //Statistik speichern und zurückgeben
-    for(int i=0; i< strlen(player1); i++) {
+
+    //Username in Statistik-Array schreiben
+    for(i = 0; i < strlen(player1); i++) {
         statistics[0].username[i] = player1[i];
     }
     statistics[0].username[strlen(player1)] = '\0';
 
-    //statistics[0].username = player1;
     statistics[0].error_count = player1_error_count;
     statistics[0].success_count = player1_input_count - player1_error_count;
-    statistics[0].time = time1;
+    statistics[0].time = time_player1;
+    statistics[0].mode = 2;
+
+    //Lösungswort für Statistik speichern
+    for(i = 0; i < strlen(solution); i++) {
+        statistics[0].solution[i] = solution[i];
+    }
+    statistics[0].solution[strlen(solution)] = '\0';
+
+    //hat Spieler 1 gewonnen?
     if(winner == 1) {
         statistics[0].success = 1;
     } else {
@@ -500,22 +521,30 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     }
 
     //Statistik Spieler 2
-    for(int i=0; i< strlen(player2); i++) {
+
+    //Username in Statistik-Array schreiben
+    for(i = 0; i < strlen(player2); i++) {
         statistics[1].username[i] = player2[i];
     }
     statistics[1].username[strlen(player2)] = '\0';
 
-    //statistics[1].username = player2;
     statistics[1].error_count = player2_error_count;
     statistics[1].success_count = player2_input_count - player2_error_count;
-    statistics[1].time = time1;
+    statistics[1].time = time_player2;
+    statistics[1].mode = 2;
+
+    //Lösungswort für Statistik speichern
+    for(i = 0; i < strlen(solution); i++) {
+        statistics[1].solution[i] = solution[i];
+    }
+    statistics[1].solution[strlen(solution)] = '\0';
+
+    //hat Spieler 2 gewonnen?
     if(winner == 2) {
         statistics[1].success = 1;
     } else {
         statistics[1].success = 0;
     }
-    statistics[0] = player1_statistic;
-    statistics[1] = player2_statistic;
 
     return statistics;
 

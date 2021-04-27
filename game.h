@@ -13,6 +13,7 @@ typedef struct
     double time;
     int success;
     int mode; //1 = 1 Spieler, 2 = 2 Spieler, 3 = Gegen Zeit
+    char solution[128];
 } Statistic;
 
 char solution[128];

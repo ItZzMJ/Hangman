@@ -8,12 +8,16 @@
 #include <conio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <time.h>
 #include "game.h"
 
 #define LENGTH 255
 #define WORDS 2048
 #define KEY 5
 
+char solution[128]; //Lösungswort
 
 /* Liest den Namen des Spielers ein und schreibt diesen in eine Datei
  * Dabei werden Namesvorschläge anhand der Eingabe des Spielers gemacht
@@ -158,12 +162,12 @@ void get_solution() {
 
     //Zufallsgenerator
     srand(time(NULL));
-    int random_index = rand () % 67;
+    int random_index = rand () % 57;
 
     FILE *word_list = fopen("Words.txt","r");
-    char input[64];
+    char input[57];
 
-    while(fgets(input, 63, word_list))
+    while(fgets(input, 56, word_list))
     {
       sscanf(input, "%s", words[count]);
       count++;
@@ -175,6 +179,9 @@ void get_solution() {
 }
 
 int get_gamemode() {
+
+    //int selection = 0;
+    //print_gamemode_selection(selection);
     int gamemode,success = 0;
 
     printf("\t1 => 1 Spieler\n");
@@ -192,8 +199,15 @@ int get_gamemode() {
         }
 
     } while(success == 1);
+
+    return gamemode;
 }
 
+
+
+/*
+ * Gib Statistiken aus
+ */
 void print_statistic(Statistic statistic) {
 
     printf("\n******* Statistik f%cr %s", ue, statistic.username);
@@ -202,10 +216,93 @@ void print_statistic(Statistic statistic) {
     printf("\tRichtig geraten:  %d\n", statistic.success_count);
     printf("\tFalsch geraten:   %d\n", statistic.error_count);
     printf("\tZ%cge insgesamt:   %d\n", ue, statistic.error_count + statistic.success_count);
+
+    //passende Anzahl an Sternchen ausgeben um die gleiche Länge der Überschrift haben
+    for(int i = 0; i < strlen(statistic.username) + 30; i++) {
+        printf("*");
+    }
+    printf("\n");
+}
+
+/*
+ * Speichert Statisken in einer Highscoreliste als CSV-Datei
+ */
+void save_statistic(Statistic statistic) {
+    FILE* file;
+    int maxc = 1024;
+    int last_id = 0;
+    int id = 0;
+    char delimiter[] = ";";
+    char* tmp;
+    char* splitted;
+    char filepath[18] = "Highscoreliste.csv";
+    filepath[18] = '\0';
+    char line[maxc];
+    time_t t;
+    struct tm* ts;
+
+    //falls keine Highscoreliste existiert erstelle eine
+    if(access(filepath, F_OK) != 0) {
+        printf("Es existiert keine Highscoreliste! Neue Liste wird erstellt..\n");
+
+        //Datei erstellen und Überschriften reinschreiben
+        file = fopen(filepath, "w+");
+        fprintf(file, "ID; name; mode; input_count; success_count; error_count; time; solution; win; date\n");
+        fclose(filepath);
+    }
+
+    file = fopen(filepath, "a+");
+
+    //Wenn die Datei nicht geöffnet werden konnte gib einen Error aus
+    if(file == NULL) {
+        perror("Error opening file!");
+        exit(-1);
+    }
+
+    //Lies Datei um die letzte ID zu finden
+    while(fgets(line, maxc, file) != NULL) {
+        tmp = strdup(line);
+
+        //letzte ID finden
+        id = strtok(tmp, delimiter);
+        if(id == "ID") {
+            id = 1;
+        } else {
+            id = atoi(id) + 1; // atoi => string zu int
+        }
+    }
+
+    //Wenn die Datei nicht geöffnet werden konnte gib einen Error aus
+    if(file == NULL) {
+        perror("Error opening file!");
+        exit(-1);
+    }
+
+    //aktuelle Zeit und Datum
+    t = time(NULL);
+    ts = localtime(&t);
+
+    fprintf(file, "%d; %s; %d; %d; %d; %d; %.2lf; %s; %d; %d-%d-%d\n",
+            id,
+            statistic.username,
+            statistic.mode,
+            statistic.error_count + statistic.success_count,
+            statistic.success_count,
+            statistic.error_count,
+            statistic.time,
+            statistic.solution,
+            statistic.success,
+            ts->tm_year+1900, ts->tm_mon, ts->tm_mday
+            );
+    fclose(file);
+
+    printf("Statistik erfolgreich gespeichert!\n");
+
 }
 
 int main()
 {
+
     char *username;
     char *player1;
     char *player2;
@@ -232,9 +329,6 @@ int main()
             //Spiel start
             statistic = run(solution, username, 0);
 
-
-            //Ausgabe der Staistik und des Highscores
-            print_statistic(statistic);
             break;
         case 2:
             //Eingabe der Spielernamen
@@ -248,13 +342,18 @@ int main()
             statistics = run_2player(solution, player1, player2);
             print_statistic(statistics[0]);
             print_statistic(statistics[1]);
+
+            //Speichern der Statistik
+            save_statistic(statistics[0]);
+            save_statistic(statistics[1]);
+
             break;
         case 3:
             //Eingabe der Spielernamen
             username = get_username(0);
 
             //Auswahl des Lösungswortes
-            get_solution(&solution);
+            get_solution();
 
             time_limit = 60;
 
@@ -263,6 +362,7 @@ int main()
 
             //Ausgabe der Staistik und des Highscores
             print_statistic(statistic);
+
             break;
         default:
             break;
@@ -270,8 +370,13 @@ int main()
 
 
 
-    //speichern der aktualisierten Highscore datei
+    if(gamemode == 1 ||gamemode == 3) {
+        //Ausgabe der Staistik und des Highscores
+        print_statistic(statistic);
 
+        //speichern der aktualisierten Highscore datei
+        save_statistic(statistic);
+    }
 
 
 
