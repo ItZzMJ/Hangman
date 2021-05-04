@@ -44,18 +44,16 @@ char ss;
 
 #endif //HANGMAN_GAME_VARS
 
-#ifndef HANGMAN_GAME_H
-#define HANGMAN_GAME_H
 
-void add_to_used_letters(char letter);
-int string_contains_char(char string[], char input_char);
-int is_valid_char(char input_char);
-char get_char();
-void update_progress(char input_char, char solution[]);
-int is_game_finished();
-void translate_to_progress(char solution[]);
-int is_time_over();
-Statistic run(char solution[], char username[],  int with_time_limit);
-Statistic * run_2player(char solution[], char player1[], char player2[]);
+#ifndef HANGMAN_FILEIO_H
+#define HANGMAN_FILEIO_H
 
-#endif //HANGMAN_GAME_H
+void write_username_to_file(char playername[128]);
+void encrypt();
+void decrypt();
+void get_solution();
+void save_statistic(Statistic statistic);
+int get_highscore_count();
+Statistic * read_highscorelist();
+
+#endif //HANGMAN_FILEIO_H

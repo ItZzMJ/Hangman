@@ -1,6 +1,6 @@
 /* Hangman Kommandozeilen-Spiel
- * Author: Jannik Möbius
- * Erstellt am: 12.04.2021
+ * Author: Jannik Möbius, Armin Spöllmann, Mark Goldmann
+ * Erstellt am: 04.05.2021
  */
 
 #include <stdio.h>
@@ -12,97 +12,25 @@
 #include <errno.h>
 #include <time.h>
 #include <windows.h>
+#include <ctype.h>
+#include "gui.h"
+#include "fileio.h"
 #include "game.h"
 
+//globale Konstate
 #define LENGTH 255
-#define WORDS 2048
-#define KEY 5
-
-char solution[128]; //Lösungswort
-
-/* Liest den Namen des Spielers ein und schreibt diesen in eine Datei
- * Dabei werden Namesvorschläge anhand der Eingabe des Spielers gemacht
- * Rückgabewert ist ein char Array mit den Usernamen
- */
-char *get_username(int player) {
-    bool valid_playername = true;
-    char playername[128] = {};
-    char *username;
-    int i = 0;
-    char line[5000] = {};
-    int position = 0;
-    FILE *names_file = fopen("playernames.txt","r");
-    fgets(line,LENGTH,names_file);
-    fclose(names_file);
-
-    while(1 == 1) {
-        system("cls");
-        if(valid_playername == false) {
-            printf("Spielername darf nicht leer sein!\n");
-        }
-        if(player != 0) {
-            printf("Spieler %i, bitte gib deinen Namen ein ", player);
-        } else {
-            printf("Bitte gib deinen Namen ein ");
-        }
-
-        print_suggestions(position, line);
-        printf("\nName: %s", playername);
 
 
-        playername[i] = getch();
-        position = get_suggestions_position(playername);
 
-        if(playername[i] == 13) {
-            if(i == 0) {
-                valid_playername = false;
-                playername[i] = NULL;
-                continue;
-            } else {
-                valid_playername = true;
-                break;
-            }
-        }
-        if(playername[i] == 8) {
-            playername[i] = NULL;
-            if(i != 0) {
-                i--;
-            }
-            playername[i] = NULL;
-        } else {
-            i++;
-        }
-    }
-    playername[strlen(playername) -1] = '\0';
-    write_username_to_file(playername);
-
-    username = malloc(sizeof(playername)+1); // Speicher bereitstellen
-    strcpy(username, playername); //Funktion soll einen Pointer zurückgeben, also wird dort der Name rüberkopiert
-
-
-    return username;
-}
-
-/* Hilfsfunktion für get_suggestions_position
- * Sucht die Postion eines Teilstrings heraus und gibt diese zurück
- */
-int strpos(char *src, char *search) {
-    char max[strlen(src)];
-    strncpy(max, src, strlen(src));
-    char *position = strstr(max, search);
-    if (position) {
-        return position - max;
-    }
-    return 0;
-}
-
-/* Sucht die Postion eines Teilstrings heraus und gibt dann die Postition des Wortanfangs zurück
- *
+/*
+ * Sucht die Postion eines Teilstrings heraus und gibt dann die Postition des Wortanfangs zurück
  */
 int get_suggestions_position(char playername[128]) {
     int position = 0;
     char line[5000] = {};
     FILE *names_file = fopen("playernames.txt","r");
+
+    //gehe durch jede Zeile in playernames.txt durch
     while(fgets(line,LENGTH,names_file)) {
         if(strstr(line, playername) != NULL) {
             position = strpos(line, playername);
@@ -122,79 +50,124 @@ int get_suggestions_position(char playername[128]) {
     return position;
 }
 
-/* Zeigt Vorschläge anhand der Eingabe des Spielers an
- *
+
+/*
+ * Liest den Namen des Spielers ein und schreibt diesen in eine Datei
+ * Dabei werden Namesvorschläge anhand der Eingabe des Spielers gemacht
+ * Rückgabewert ist ein char Array mit den Usernamen
  */
-void print_suggestions(int position, char line[5000]) {
-    printf("\nVorschlag: ");
-    if(position != -1) {
-        for(int j = position; j < strlen(line);j++) {
-            if(line[j] == 13) {
+char *get_username(int player) {
+    bool valid_playername = true;
+    char playername[128] = {};
+    char *username;
+    int i = 0;
+    char line[5000] = {};
+    int position = -1;
+    FILE *names_file = fopen("playernames.txt","r");
+    fgets(line,LENGTH,names_file);
+    fclose(names_file);
+
+    while(1 == 1) {
+        system("cls");
+        if(valid_playername == false) {
+            printf("Bitte gib einen g\x81ltigen Spielernamen ein!\n");
+        }
+        if(player != 0) {
+            printf("Spieler %i, bitte gib deinen Namen ein ", player);
+        } else {
+            printf("Bitte gib deinen Namen ein ");
+        }
+
+        print_suggestions(position, line);
+        printf("\nName: %s", playername);
+
+
+        playername[i] = getch();
+        position = get_suggestions_position(playername);
+
+        if(playername[i] == 13) { //Wenn ENTER gedrückt wurde
+            if(i == 0) {
+                valid_playername = false;
+                playername[i] = NULL;
+                continue;
+            } else {
+                valid_playername = true;
                 break;
             }
-            printf("%c", line[j]);
         }
-    }
-}
 
-/* Schreibt den eingegebenen Spielernamen in eine .txt Datei
- * Es werden keine doppelten Einträge geschrieben
- */
-void write_username_to_file(char playername[128]){
-    char line[LENGTH][WORDS];
-    bool name_already_exists = false;
-    FILE *names_file = fopen("playernames.txt","r");
-    while(fgets(line,LENGTH,names_file)) {
-        if(strstr(line, playername) != NULL) {
-            name_already_exists = true;
+        if(playername[i] == 32) { //Wenn SPACE gedrückt wurde
+            valid_playername = false;
+            position = -1;
+            playername[i] = NULL;
+            continue;
+        }
+
+        if(playername[i] == 9) { //Wenn TAB gedrückt wurde
+            playername[i] = NULL;
+            position = get_suggestions_position(playername);
+            i = 0;
+
+            for(int j = position; j < strlen(line);j++) {
+                if(line[j] == 13) {
+                    playername[i] = line[j];
+                    break;
+                }
+                playername[i] = line[j];
+                i++;
+            }
+            if(position == -1) {
+                valid_playername = false;
+                playername[i] = NULL;
+                continue;
+
+            } else {
+                valid_playername = true;
+                break;
+            }
+        }
+
+        if(playername[i] == 8) { //Wenn BACKSPACE gedrückt wurde
+            playername[i] = NULL;
+            if(i != 0) {
+                i--;
+            }
+            playername[i] = NULL;
+        } else {
+            i++;
         }
     }
-    fclose(names_file);
-    if(name_already_exists == false) {
-        FILE *WriteToFile = fopen("playernames.txt","a");
-        fprintf(WriteToFile,"%s",playername);
-        fclose(WriteToFile);
-    }
+    write_username_to_file(playername);
+    playername[strlen(playername) -1] = '\0';
+
+    username = malloc(sizeof(playername)+1); // Speicher bereitstellen
+    strcpy(username, playername); //Funktion soll einen Pointer zurückgeben, also wird dort der Name rüberkopiert
+
+
+    return username;
 }
 
 /*
- * ändert die Farbe der Konsolenausgabe
+ * Hilfsfunktion für get_suggestions_position
+ * Sucht die Postion eines Teilstrings heraus und gibt diese zurück
  */
-void SetConsoleColourActive()
-{
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED);
+int strpos(char *src, char *search) {
+    char max[strlen(src)];
+    strncpy(max, src, strlen(src));
+    char *position = strstr(max, search);
+    if (position) {
+        return position - max;
+    }
+    return 0;
 }
+
+
 
 /*
- * setzt die Farbe der Konsolenausgabe zurück
+ * Methode für die Spielmodusauswahl
+ * Gibt den gewählten Spielmodus als Zahl zurück
+ * 1 => 1 Spieler; 2 => 2 Spieler; 3 => 1 Spieler gegen Zeit
  */
-void ResetConsoleColour()
-{
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-}
-
-void get_solution() {
-    char words[WORDS][LENGTH];
-    int count = 0;
-
-    //Zufallsgenerator
-    srand(time(NULL));
-    int random_index = rand () % 57;
-
-    FILE *word_list = fopen("Words.txt","r");
-    char input[57];
-
-    while(fgets(input, 56, word_list))
-    {
-      sscanf(input, "%s", words[count]);
-      count++;
-    }
-    for(int i = 0; i < strlen(words[random_index]); i++) {
-        solution[i] = words[random_index][i];
-    }
-    fclose(word_list);
-}
-
 int get_gamemode() {
 
     int ch1, ch2;
@@ -222,7 +195,7 @@ int get_gamemode() {
 
                 case 80: //Pfeiltaste nach unten
                     //printf("DOWN WAS PRESSED\n");
-                    if(selection < 3) {
+                    if(selection < 4) {
                         selection++;
                     }
                     print_gamemode_selection(selection);
@@ -238,177 +211,155 @@ int get_gamemode() {
     return selection;
 }
 
-void print_header() {
-    printf(" _                                             \n"
-           "| |                                            \n"
-           "| |__   __ _ _ __   __ _ _ __ ___   __ _ _ __  \n"
-           "| '_ \\ / _` | '_ \\ / _` | '_ ` _ \\ / _` | '_ \\ \n"
-           "| | | | (_| | | | | (_| | | | | | | (_| | | | |\n"
-           "|_| |_|\\__,_|_| |_|\\__, |_| |_| |_|\\__,_|_| |_|\n"
-           "                    __/ |                      \n"
-           "                   |___/                       \n");
-}
+
 
 /*
- * Gib das Menü
+ * Analysiert die gegebenen Statistiken
  */
-void print_gamemode_selection(int selection) {
-    system("cls");
-    print_header();
-    printf("Navigation mit den Pfeiltasten\n", selection);
-    printf("\n\n\t");
+Highscore * analyse_highscores(Statistic *statistics) {
+    int i,j,k = 0;
+    int player_count = 0;
+    int exists_in_array = 0;
+    int max = 0;
+    int tmp_index = 0;
+    char *username;
+    int entry_count = 0;
+    Highscore * highscores;
 
-    if(selection == 1) {
-        SetConsoleColourActive();
-    }
-    printf("1 Spieler\n\t");
-    ResetConsoleColour();
+    entry_count = get_highscore_count() - 1;
+    Highscore * tmp = malloc(sizeof(Highscore) * entry_count); //temporäres Highscore-array
 
-    if(selection == 2) {
-        SetConsoleColourActive();
-    }
-    printf("2 Spieler\n\t");
-    ResetConsoleColour();
 
-    if(selection == 3) {
-        SetConsoleColourActive();
-    }
-    printf("1 Spieler gegen Zeit\n");
-    ResetConsoleColour();
+    //Satistiken analysen und in ungeordnetes und wahrscheinlich zu großes Highscore-array speichern
+    for(i = 0; i < entry_count; i++) {
+        username = statistics[i].username;
 
-}
+        tmp_index = 0;
 
-/*
- * Gib Statistiken aus
- */
-void print_statistic(Statistic statistic) {
-
-    printf("\n\t******* Statistik f%cr %s", ue, statistic.username);
-    printf(" *******\n");
-    printf("\t\tBen%ctigte Zeit:   %.2lfs\n", oe, statistic.time);
-    printf("\t\tRichtig geraten:  %d\n", statistic.success_count);
-    printf("\t\tFalsch geraten:   %d\n", statistic.error_count);
-    printf("\t\tZ%cge insgesamt:   %d\n\t", ue, statistic.error_count + statistic.success_count);
-
-    //passende Anzahl an Sternchen ausgeben um die gleiche Länge der Überschrift haben
-    for(int i = 0; i < strlen(statistic.username) + 30; i++) {
-        printf("*");
-    }
-    printf("\n");
-}
-
-/*
- * Speichert Statisken in einer Highscoreliste als CSV-Datei
- */
-void save_statistic(Statistic statistic) {
-    FILE* file;
-    int maxc = 1024;
-    int last_id = 0;
-    int id = 0;
-    char delimiter[] = ";";
-    char* tmp;
-    char* splitted;
-    char filepath[18] = "Highscoreliste.csv";
-    filepath[18] = '\0';
-    char line[maxc];
-    time_t t;
-    struct tm* ts;
-
-    //falls keine Highscoreliste existiert erstelle eine
-    if(access(filepath, F_OK) != 0) {
-        printf("Es existiert keine Highscoreliste! Neue Liste wird erstellt..\n");
-
-        //Datei erstellen und Überschriften reinschreiben
-        file = fopen(filepath, "w+");
-        fprintf(file, "ID; name; mode; input_count; success_count; error_count; time; solution; win; date\n");
-        fclose(filepath);
-    }
-
-    file = fopen(filepath, "a+");
-
-    //Wenn die Datei nicht geöffnet werden konnte gib einen Error aus
-    if(file == NULL) {
-        perror("Error opening file!");
-        exit(-1);
-    }
-
-    //Lies Datei um die letzte ID zu finden
-    while(fgets(line, maxc, file) != NULL) {
-        tmp = strdup(line);
-
-        //letzte ID finden
-        id = strtok(tmp, delimiter);
-        if(id == "ID") {
-            id = 1;
-        } else {
-            id = atoi(id) + 1; // atoi => string zu int
+        //überprüfe ob der Username bereits im tmp-array existiert
+        for(j = 0; j < entry_count; j++) {
+            if(strcmp(tmp[j].username, username) == 0) {
+                tmp_index = j;//index merken
+            }
         }
+
+        //Username existiert bereits im tmp-array
+        if(tmp_index != 0) {
+            tmp[tmp_index].global_intput_count += statistics[i].success_count + statistics[i].error_count;
+
+            if(statistics[i].success == 1) { //überprüfe ob das Spiel gewonnen oder verloren war
+                tmp[tmp_index].games_won++;
+            } else {
+                tmp[tmp_index].games_lost++;
+            }
+
+            //durchschnittl. gebrauchte Zeit
+            tmp[tmp_index].avg_time = (tmp[tmp_index].avg_time * (tmp[tmp_index].games_won + tmp[tmp_index].games_lost - 1) + statistics[i].time) / (tmp[tmp_index].games_won + tmp[tmp_index].games_lost);
+
+        } else { //Username existiert noch nicht
+            for(k = 0; k < strlen(username); k++) { // Username kopieren
+                tmp[player_count].username[k] = username[k];
+            }
+            tmp[player_count].username[strlen(username)] = '\0';
+
+
+            //weitere Daten im tmp-array speichern
+            tmp[player_count].global_intput_count = statistics[i].success_count + statistics[i].error_count;
+            tmp[player_count].avg_time = statistics[i].time;
+
+            if(statistics[i].success == 1) { //überprüfe ob das Spiel gewonnen oder verloren war
+                tmp[player_count].games_lost = 0;
+                tmp[player_count].games_won = 1;
+
+            } else {
+                tmp[player_count].games_lost = 1;
+                tmp[player_count].games_won = 0;
+            }
+
+            player_count++;
+        }
+
     }
 
-    //Wenn die Datei nicht geöffnet werden konnte gib einen Error aus
-    if(file == NULL) {
-        perror("Error opening file!");
-        exit(-1);
+    printf("after for\n");
+
+    highscores = malloc(sizeof(Highscore) * 3);
+
+    //Highscore-array sortieren und die 3 besten in neues Array schreiben
+    for(i = 0; i < 3; i++) {
+        max = 0;
+
+        //Spieler mit den meisten Siegen herausfinden
+        for(j = 0; j < player_count; j++) {
+            if(tmp[j].games_won > max) {
+                max = tmp[j].games_won;
+                tmp_index = j;
+            }
+        }
+
+        //In Highscore-array schreiben und aus dem tmp-array "entfernen" indem man gewonnene Spiele auf 0 setzt
+        highscores[i] = tmp[tmp_index];
+        tmp[tmp_index].games_won = 0;
     }
 
-    //aktuelle Zeit und Datum
-    t = time(NULL);
-    ts = localtime(&t);
 
-    //Daten in die Dateischreiben
-    fprintf(file, "%d; %s; %d; %d; %d; %d; %.2lf; %s; %d; %d-%d-%d\n",
-            id,
-            statistic.username,
-            statistic.mode,
-            statistic.error_count + statistic.success_count,
-            statistic.success_count,
-            statistic.error_count,
-            statistic.time,
-            statistic.solution,
-            statistic.success,
-            ts->tm_year+1900, ts->tm_mon, ts->tm_mday
-            );
-    fclose(file);
+    free(tmp); //Speicher wieder freigeben
 
-    printf("\tStatistik erfolgreich gespeichert!\n");
-
+    return highscores;
 }
 
-void print_main_menu(int selection) {
-    system("cls");
-    print_header();
-    printf("\nNavigation mit den Pfeiltasten\n\n\t");
 
-    if(selection == 0) {
-        SetConsoleColourActive();
-    }
-    printf("Spielen\n\t");
-    ResetConsoleColour();
-
-
-    if(selection == 1) {
-        SetConsoleColourActive();
-    }
-    printf("Highscoreliste anzeigen\n");
-    ResetConsoleColour();
-
-}
-
-print_highscorelist() {
-    //TODO:
-}
-
-void read_highscorelist() {
-    //TODO:
-}
-
+/*
+ * Zeigt die aktuell 3 besten Spieler an mit Statistiken
+ */
 void show_highscores() {
-    //TODO:
+    int status = 0;
+    int count = 0;
+    Highscore *highscores;
+    Statistic *statistics;
+
+    printf("\nStart reading\n");
+
+    //Highscoreliste einlesen
+    statistics = read_highscorelist();
+
+    printf("start analysing\n");
+
+    //Highscores analysieren
+    highscores = analyse_highscores(statistics);
+
+    printf("start printing\n");
+
+    //Highscores ausgeben
+    print_highscorelist(highscores, 3);
+
+
+    //auf beliebige Tasteneingabe warten um zurück ins Hauptmenü zu gelangen
+    getch();
+
+    printf("reseting vars\n");
+
+    //Speicher freigeben
+    count = sizeof(statistics) / sizeof(statistics[0]);
+    memset(statistics, 0, sizeof(Statistic) * count);
+    printf("memset done\n");
+    statistics = NULL;
+
+    free(highscores);
+    printf("Highscores freed\n");
+
+
+    printf("Vars reseted!\n");
 }
 
+
+/*
+ * Spielmethode
+ * Startet erst die Spielmodus auswahl und dann den gewählten Spielmodus
+ * Am Ende werden die Statistiken ausgegeben und gespeichert
+ */
 int run_game()
 {
-
     char *username;
     char *player1;
     char *player2;
@@ -422,7 +373,7 @@ int run_game()
 
 
     switch (gamemode) {
-        case 1:
+        case 1: //1 Spieler
             //Eingabe des Spielernamens
             username = get_username(0);
 
@@ -430,10 +381,11 @@ int run_game()
             get_solution();
 
             //Spiel start
-            statistic = run(solution, username, 0);
+            statistic = run(solution, username, time_limit);
 
             break;
-        case 2:
+
+        case 2: //2 Spieler
             //Eingabe der Spielernamen
             player1 = get_username(1);
             player2 = get_username(2);
@@ -443,15 +395,21 @@ int run_game()
 
             //Spiel start
             statistics = run_2player(solution, player1, player2);
+
+            //Ausgabe der Statistik
             print_statistic(statistics[0]);
             print_statistic(statistics[1]);
 
-            //Speichern der Statistik
+            //Speichern in der Highscoreliste
             save_statistic(statistics[0]);
             save_statistic(statistics[1]);
 
+            memset(statistics, 0, sizeof(Statistic) * 2);
+            statistics = NULL;
+
             break;
-        case 3:
+
+        case 3: //1 Spieler gegen Zeit
             //Eingabe der Spielernamen
             username = get_username(0);
 
@@ -463,69 +421,95 @@ int run_game()
             //Spiel start
             statistic = run(solution, username, time_limit);
 
-            //Ausgabe der Staistik und des Highscores
-            print_statistic(statistic);
-
             break;
+
+        case 4: //zurück
+            return 0;
         default:
             break;
     }
 
 
-
+    //Bei 1 Spieler Modi
     if(gamemode == 1 || gamemode == 3) {
         //Ausgabe der Staistik und des Highscores
         print_statistic(statistic);
 
         //speichern der aktualisierten Highscore datei
         save_statistic(statistic);
+
+        //Variable freigeben
+        memset(&statistic, 0, sizeof(Statistic));
     }
+
+    printf("\n\nbeliebige Taste dr%ccken um zur%cck ins Hauptmen%c zu gelangen\n\n", ue, ue, ue);
+
+    getch(); // Auf Eingabe des Spielers warten
 
     return 0;
 }
 
+/*
+ * Hauptmenü
+ * Ermöglicht Navigation im Hauptmenü und sorgt dafür, dass nach Beenden des Spiels wieder zurück ins Hauptmenü gelangt
+ */
 int main() {
     int selection = 0;
     int ch1, ch2;
-    print_main_menu(selection);
 
-    //Menü-Schleife
-    while(1 == 1) {
-        ch1 = getch();
-        ch2 = 0;
-        if (ch1 == 0xE0) { // eine Scrolltaste wurde gedrückt
-            ch2 = getch();
-            //entscheide welche scrolltaste
-            switch(ch2)
-            {
-                case 72: //Pfeiltaste nach oben
-                    if(selection == 1) {
-                        selection--;
-                    }
-                    print_main_menu(selection);
+    //Spiel-Schleife
+    while(1) {
+        print_main_menu(selection);
 
-                    break;
+        //Menü-Schleife
+        while(1) {
+            ch1 = getch();
+            ch2 = 0;
+            if (ch1 == 0xE0) { // eine Scrolltaste wurde gedrückt
+                ch2 = getch();
 
-                case 80: //Pfeiltaste nach unten
-                    if(selection == 0) {
-                        selection++;
-                    }
-                    print_main_menu(selection);
-                    break;
+                //entscheide welche scrolltaste
+                switch(ch2)
+                {
+                    case 72: //Pfeiltaste nach oben
+                        if(selection > 0) {
+                            selection--;
+                        }
+                        print_main_menu(selection);
 
-                default:
-                    break;
+                        break;
+
+                    case 80: //Pfeiltaste nach unten
+                        if(selection < 2) {
+                            selection++;
+                        }
+                        print_main_menu(selection);
+                        break;
+
+                    default:
+                        break;
+                }
+            } else if(ch1 == 13) {
+                break;
             }
-        } else if(ch1 == 13) {
-            break;
+        }
+
+        if(selection == 0) {
+            //Spielstart
+            if(run_game() == -1) {
+                //beende Spiel, sonst neustart im Menü
+                break;
+            }
+
+        } else if(selection == 1) {
+            show_highscores();
+            printf("showing highscores complete");
+
+        } else if(selection == 2) { //Spiel beenden
+            return 0;
         }
     }
 
-    if(selection == 0) {
-        run_game();
-    } else if(selection == 1) {
-        show_highscores();
-    }
 
     return 0;
 }

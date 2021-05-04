@@ -1,7 +1,8 @@
-/* Hangman Kommandozeilen-Spiel
- * Author: Jannik Möbius
- * Erstellt am: 12.04.2021
+/* Hangman Kommandozeilen-Spiel Bibliothek
+ * Author: Jannik Möbius, Armin Spöllmann, Mark Goldmann
+ * Erstellt am: 04.05.2021
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,12 +10,14 @@
 #include <stdbool.h>
 #include <time.h>
 #include "game.h"
+#include "gui.h"
+#include "fileio.h"
 
-char progress[128];
-char used_letters[30];
-int time_limit = 0;
+
+//char progress[128];
+//char used_letters[30];
+//int time_limit = 0;
 clock_t game_start;
-//clock_t tstart;
 
 //Umlaute
 char ae = '\x84';
@@ -22,18 +25,31 @@ char oe = '\x94';
 char ue = '\x81';
 char ss = '\xE1';
 
-void print_progress() {
-    printf("\n\t\t");
-    for(int i = 0; i < strlen(progress); i++) {
-        printf("%c ", progress[i]);
-    }
-    printf("\n\n");
-}
 
-int add_to_used_letters(char letter) {
+
+/*
+ * Füge den getippten Buchstaben zu den bereits geratenen Buchstaben hinzu, alphabetisch geordnet
+ */
+void add_to_used_letters(char letter) {
+    int tmp = 0;
     used_letters[strlen(used_letters)] = letter;
+
+    //alphabetisch sortieren
+    for (int i = 1; i < strlen(used_letters); i++) {
+        for (int j = 0; j < strlen(used_letters) - 1 ; j++) {
+            if (used_letters[j] > used_letters[j + 1]) {
+                tmp = used_letters[j];
+                used_letters[j] = used_letters[j + 1];
+                used_letters[j + 1] = tmp;
+            }
+        }
+    }
 }
 
+
+/*
+ * Überprüft ob der gegebene Buchstabe in dem gegebenen String vorkommt
+ */
 int string_contains_char(char string[], char input_char){
     for(int i = 0; i < strlen(string); i++) {
         if(tolower(string[i]) == input_char) {
@@ -46,11 +62,11 @@ int string_contains_char(char string[], char input_char){
 
 }
 
+
 /*
  * Überprüft ob das gegebene Zeichen ein valider Buchstabe ist
  */
 int is_valid_char(char input_char) {
-    printf("%c", input_char);
 
     if(input_char == ae || input_char == oe || input_char == ue || input_char == ss) {
         printf("\nUMLAUT\n");
@@ -66,6 +82,10 @@ int is_valid_char(char input_char) {
     }
 }
 
+
+/*
+ * Liest einen Zeichen aus der Kommandozeile ein und überprüft ob das Zeichen ein legitimer Buchstabe ist
+ */
 char get_char() {
     int success = 0;
     char input_char;
@@ -97,6 +117,9 @@ char get_char() {
 }
 
 
+/*
+ * Überprüft ob der gegebene Buchstabe im Lösungswort enthalten ist und schreibt in dann in das Fortschritts-array
+ */
 void update_progress(char input_char, char solution[]) {
     for(int i = 0; i < strlen(solution); i++) {
         if (tolower(solution[i]) == input_char) {
@@ -105,6 +128,11 @@ void update_progress(char input_char, char solution[]) {
     }
 }
 
+
+/*
+ * Überprüft ob das Wort vollständig erraten wurde
+ * gibt 0 für noch nicht erraten und 1 für vollständig erraten zurück
+ */
 int is_game_finished() {
     for(int i = 0; i < strlen(progress); i++) {
         if(progress[i] == '_') {
@@ -114,119 +142,10 @@ int is_game_finished() {
     return 1; // 1 = true
 }
 
-void print_game(error_count) {
-    system("cls"); // clear console
 
-    char hangman[8][150] = {
-            "\t\t  +---+\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t  |   |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t /|   |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t /|\\  |\n"
-            "\t\t      |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t /|\\  |\n"
-            "\t\t /    |\n"
-            "\t\t      |\n"
-            "\t\t=========\n",
-            "\t\t  +---+\n"
-            "\t\t  |   |\n"
-            "\t\t  o   |\n"
-            "\t\t /|\\  |\n"
-            "\t\t / \\  |\n"
-            "\t\t      |\n"
-            "\t\t=========\n"
-    };
-
-    printf("********************** Hangman **********************\n");
-
-    print_time();
-
-    printf("%s", hangman[error_count]);
-
-    print_progress();
-
-
-    // Wenn es bereits benutzte Buchstaben gibt, gib diese aus
-    if(strlen(used_letters) > 0) {
-        printf("\n\tBereits benutzte Buchstaben:\n\t");
-        for(int i = 0; i < strlen(used_letters); i++) {
-            if(i == 0) {
-                printf("%c", toupper(used_letters[i]));
-            } else {
-                printf(", %c", toupper(used_letters[i]));
-            }
-        }
-    }
-    printf("\n\n");
-
-
-}
-
-void print_time() {
-    double time = 0.0;
-    double time_left = 0.0;
-
-    time += clock() - game_start;
-    time = time/CLOCKS_PER_SEC;
-
-    //richtige Einrückung festlegen um beide Zeiten passend zu positionieren
-    if(time < 10) {
-        printf("\t\t\t\t\t Zeit:  %.2lfs\n", time);
-    } else {
-        printf("\t\t\t\t\t Zeit: %.2lfs\n", time);
-    }
-
-
-    if(time_limit != 0) {
-        time_left = time_limit - time;
-        if(time_left < 10 && time > 0) {
-            printf("\t\t\t    verlbeibende Zeit:  %.2lfs\n", time_left);
-        } else {
-            printf("\t\t\t    verlbeibende Zeit: %.2lfs\n", time_left);
-
-        }
-    }
-}
-
+/*
+ * Schreibt das Lösungswort in Unterstriche um
+ */
 void translate_to_progress(char solution[]) {
     for (int i = 0; i < strlen(solution); i++) {
         if (solution[i] == ' ') {
@@ -244,6 +163,11 @@ void translate_to_progress(char solution[]) {
     }
 }
 
+
+/*
+ * Überprüft ob das Zeitlimit überschritten wurde
+ * Gibt 1 zurück wenn Zeit vorbei, 0 wenn nicht oder es kein Zeitlimit gibt
+ */
 int is_time_over(){
     double time = 0.0;
     time += clock() -game_start;
@@ -261,78 +185,22 @@ int is_time_over(){
 
 }
 
-void print_endscreen(int game_won) {
-    system("cls");
-    if(game_won == 1) {
-        printf("           ________________\n"
-               "      .---'::'             `---.\n"
-               "     (::::::'                   )\n"
-               "     |`-----.____________.-----'|\n"
-               "     |                   :::::::|\n"
-               "    .|                    ::::::!-.\n"
-               "    \\|                    :::::/|/\n"
-               "     |                      ::::|\n"
-               "     |   Special Flonk Award :::|\n"
-               "     |      for Silliness   ::::|\n"
-               "     |                    ::::::|\n"
-               "     |                   .::::::|\n"
-               "     J                   :::::::F\n"
-               "      \\                 :::::::/\n"
-               "       `.             .:::::::'\n"
-               "         `-._       .::::::-'\n"
-               "             |       \"\"\"|\"\n"
-               "             |       :::|\n"
-               "             F        ::J\n"
-               "            /          ::\\\n"
-               "       __.-'           :::`-.__\n"
-               "      (_                ::::::_)\n"
-               "        `\"\"\"--------------\"\"\"'\n");
 
-        printf("__     ______  _    _  __          _______ _   _   _ \n"
-               "\\ \\   / / __ \\| |  | | \\ \\        / /_   _| \\ | | | |\n"
-               " \\ \\_/ / |  | | |  | |  \\ \\  /\\  / /  | | |  \\| | | |\n"
-               "  \\   /| |  | | |  | |   \\ \\/  \\/ /   | | | . ` | | |\n"
-               "   | | | |__| | |__| |    \\  /\\  /   _| |_| |\\  | |_|\n"
-               "   |_|  \\____/ \\____/      \\/  \\/   |_____|_| \\_| (_)\n"
-               "\n");
-
-    } else if(game_won == 0) {
-        printf("               ...\n"
-               "             ;::::;\n"
-               "           ;::::; :;\n"
-               "         ;:::::'   :;\n"
-               "        ;:::::;     ;.\n"
-               "       ,:::::'       ;           OOO\\\n"
-               "       ::::::;       ;          OOOOO\\\n"
-               "       ;:::::;       ;         OOOOOOOO\n"
-               "      ,;::::::;     ;'         / OOOOOOO\n"
-               "    ;:::::::::`. ,,,;.        /  / DOOOOOO\n"
-               "  .';:::::::::::::::::;,     /  /     DOOOO\n"
-               " ,::::::;::::::;;;;::::;,   /  /        DOOO\n"
-               ";`::::::`'::::::;;;::::: ,#/  /          DOOO\n"
-               ":`:::::::`;::::::;;::: ;::#  /            DOOO\n"
-               "::`:::::::`;:::::::: ;::::# /              DOO\n"
-               "`:`:::::::`;:::::: ;::::::#/               DOO\n"
-               " :::`:::::::`;; ;:::::::::##                OO\n"
-               " ::::`:::::::`;::::::::;:::#                OO\n"
-               " `:::::`::::::::::::;'`:;::#                O\n"
-               "  `:::::`::::::::;' /  / `:#\n"
-               "   ::::::`:::::;'  /  /   `#\n");
-
-        printf("__     ______  _    _   _      ____   _____ ______ _ \n"
-               "\\ \\   / / __ \\| |  | | | |    / __ \\ / ____|  ____| |\n"
-               " \\ \\_/ / |  | | |  | | | |   | |  | | (___ | |__  | |\n"
-               "  \\   /| |  | | |  | | | |   | |  | |\\___ \\|  __| | |\n"
-               "   | | | |__| | |__| | | |___| |__| |____) | |____|_|\n"
-               "   |_|  \\____/ \\____/  |______\\____/|_____/|______(_)\n"
-               "\n");
-    }
-
-    printf("\n\n\tbeliebigen Knopf dr%ccken\n", ue);
-    getch();
+/*
+ * leert die benutzten Variablen, sodass diese für das nächste Spiel wieder verwendet werden können
+ */
+void reset_vars() {
+    memset(&used_letters, 0, sizeof(used_letters));
+    memset(&solution, 0, sizeof(solution));
+    memset(&progress, 0, sizeof(progress));
+    time_limit = 0;
 }
 
 
+/*
+ * Spielmethode für 1 Spieler und 1 Spieler gegen Zeit
+ * gibt nach Beendigung des Spiels die Statistik des Spiels zurück
+ */
 Statistic run(char solution[128], char *username, int with_time_limit) {
     int game_finished = 0; // ist das Spiel beendet?
     char input_char;
@@ -349,7 +217,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     translate_to_progress(solution);
 
     //Spielfeld ausgeben
-    print_game(error_count);
+    print_game(error_count, input_count);
 
     do {
         // Buchstabe eingeben
@@ -369,7 +237,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
         }
 
         //Spiel layout anhand des Buchstabens ändern
-        print_game(error_count);
+        print_game(error_count, input_count);
 
         //Überprüfe ob Zeitlimit überschritten wurde
         if(is_time_over()) {
@@ -400,7 +268,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
 
 
     //Statistik speichern und zurückgeben
-    for(int i=0; i< strlen(username); i++) {
+    for(int i = 0; i < strlen(username); i++) {
         statistic.username[i] = username[i];
     }
     statistic.username[strlen(username)] = '\0';
@@ -420,10 +288,18 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
 
     print_endscreen(game_won);
 
+    //Variablen zurücksetzen
+    reset_vars();
+
     return statistic;
 
 }
 
+
+/*
+ * Spielmethode für 2 Spieler
+ * gibt nach Beendigung des Spiels die Statistiken der Spieler zurück
+ */
 Statistic * run_2player(char solution[], char player1[], char player2[]) {
     int game_finished = 0; // ist das Spiel beendet?
     char input_char;
@@ -433,7 +309,6 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     int error_count = 0;
     int player1_input_count = 0;
     int player2_input_count = 0;
-    int input_count = 0;
     int player1_success_count = 0;
     int player2_success_count = 0;
     int active_player = 1;
@@ -451,7 +326,7 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     game_start = clock(); //globale Zeitmessung starten
 
     //Spielfeld ausgeben
-    print_game(error_count);
+    print_game(error_count, player1_input_count + player2_error_count);
 
 
 
@@ -508,7 +383,7 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
         }
 
         //Spiel layout anhand des Buchstabens ändern
-        print_game(error_count);
+        print_game(error_count, player1_input_count + player2_input_count);
 
         //check ob das spiel beendet ist
         if(error_count >= 7) {
@@ -620,6 +495,13 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
     } else {
         statistics[1].success = 0;
     }
+
+    //TODO:
+    //print_endscreen();
+
+
+    //Variablen zurücksetzen
+    reset_vars();
 
     return statistics;
 

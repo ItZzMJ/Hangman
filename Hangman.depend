@@ -1,0 +1,84 @@
+# depslib dependency file v1.0
+1620131275 source:c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\game.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<stdbool.h>
+	<time.h>
+	"game.h"
+	"gui.h"
+	"fileio.h"
+
+1620047883 
+
+1620122113 c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\game.h
+
+1620126605 source:c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\main.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	<ctype.h>
+	"gui.h"
+	"fileio.h"
+	"game.h"
+
+1620046324 source:/media/jannik/Acer1/Users/Jannik/Desktop/Berufsschule/LF4 + 5/Hangman_armin/game.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<stdbool.h>
+	<time.h>
+	"game.h"
+
+1620039184 /media/jannik/Acer1/Users/Jannik/Desktop/Berufsschule/LF4 + 5/Hangman_armin/game.h
+
+1620048515 source:/media/jannik/Acer1/Users/Jannik/Desktop/Berufsschule/LF4 + 5/Hangman_armin/main.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	"game.h"
+
+1620131633 c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\gui.h
+
+1620121847 c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\fileio.h
+
+1620127813 source:c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\fileio.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	<ctype.h>
+	"game.h"
+	"gui.h"
+	"fileio.h"
+
+1620132177 source:c:\users\jannik\desktop\berufsschule\lf4 + 5\hangman_armin\gui.c
+	<conio.h>
+	<stdio.h>
+	<stdbool.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	"game.h"
+	"fileio.h"
+
