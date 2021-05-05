@@ -23,6 +23,21 @@
 
 
 /*
+ * Hilfsfunktion für get_suggestions_position
+ * Sucht die Postion eines Teilstrings heraus und gibt diese zurück
+ */
+int strpos(char *src, char *search) {
+    char max[strlen(src)];
+    strncpy(max, src, strlen(src));
+    char *position = strstr(max, search);
+    if (position) {
+        return position - max;
+    }
+    return 0;
+}
+
+
+/*
  * Sucht die Postion eines Teilstrings heraus und gibt dann die Postition des Wortanfangs zurück
  */
 int get_suggestions_position(char playername[128]) {
@@ -88,7 +103,7 @@ char *get_username(int player) {
         if(playername[i] == 13) { //Wenn ENTER gedrückt wurde
             if(i == 0) {
                 valid_playername = false;
-                playername[i] = NULL;
+                playername[i] = '\0';
                 continue;
             } else {
                 valid_playername = true;
@@ -99,12 +114,12 @@ char *get_username(int player) {
         if(playername[i] == 32) { //Wenn SPACE gedrückt wurde
             valid_playername = false;
             position = -1;
-            playername[i] = NULL;
+            playername[i] = '\0';
             continue;
         }
 
         if(playername[i] == 9) { //Wenn TAB gedrückt wurde
-            playername[i] = NULL;
+            playername[i] = '\0';
             position = get_suggestions_position(playername);
             i = 0;
 
@@ -118,7 +133,7 @@ char *get_username(int player) {
             }
             if(position == -1) {
                 valid_playername = false;
-                playername[i] = NULL;
+                playername[i] = '\0';
                 continue;
 
             } else {
@@ -128,11 +143,11 @@ char *get_username(int player) {
         }
 
         if(playername[i] == 8) { //Wenn BACKSPACE gedrückt wurde
-            playername[i] = NULL;
+            playername[i] = '\0';
             if(i != 0) {
                 i--;
             }
-            playername[i] = NULL;
+            playername[i] = '\0';
         } else {
             i++;
         }
@@ -146,21 +161,6 @@ char *get_username(int player) {
 
     return username;
 }
-
-/*
- * Hilfsfunktion für get_suggestions_position
- * Sucht die Postion eines Teilstrings heraus und gibt diese zurück
- */
-int strpos(char *src, char *search) {
-    char max[strlen(src)];
-    strncpy(max, src, strlen(src));
-    char *position = strstr(max, search);
-    if (position) {
-        return position - max;
-    }
-    return 0;
-}
-
 
 
 /*
@@ -219,7 +219,6 @@ int get_gamemode() {
 Highscore * analyse_highscores(Statistic *statistics) {
     int i,j,k = 0;
     int player_count = 0;
-    int exists_in_array = 0;
     int max = 0;
     int tmp_index = 0;
     char *username;
@@ -313,7 +312,6 @@ Highscore * analyse_highscores(Statistic *statistics) {
  * Zeigt die aktuell 3 besten Spieler an mit Statistiken
  */
 void show_highscores() {
-    int status = 0;
     int count = 0;
     Highscore *highscores;
     Statistic *statistics;
@@ -339,8 +337,11 @@ void show_highscores() {
 
     printf("reseting vars\n");
 
+
+    //Array länge herausfinden
+    count = get_highscore_count() - 1;
+
     //Speicher freigeben
-    count = sizeof(statistics) / sizeof(statistics[0]);
     memset(statistics, 0, sizeof(Statistic) * count);
     printf("memset done\n");
     statistics = NULL;
