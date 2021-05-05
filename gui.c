@@ -338,7 +338,7 @@ void print_game(int error_count, int input_count) {
 /*
  * Gibt den End-Bildschirm aus
  */
-void print_endscreen(int game_won) {
+void print_endscreen(int game_won, char *username) {
     system("cls");
     if(game_won == 1) {
         printf("           ________________\n"
@@ -364,6 +364,10 @@ void print_endscreen(int game_won) {
                "       __.-'           :::`-.__\n"
                "      (_                ::::::_)\n"
                "        `\"\"\"--------------\"\"\"'\n");
+
+        if(strlen(username) != 0) {
+            printf("\t\t %s \n", username);
+        }
 
         printf("__     ______  _    _  __          _______ _   _   _ \n"
                "\\ \\   / / __ \\| |  | | \\ \\        / /_   _| \\ | | | |\n"

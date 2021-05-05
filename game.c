@@ -286,7 +286,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     statistic.solution[strlen(solution)] = '\0';
 
 
-    print_endscreen(game_won);
+    print_endscreen(game_won, '\0');
 
     //Variablen zurücksetzen
     reset_vars();
@@ -496,9 +496,13 @@ Statistic * run_2player(char solution[], char player1[], char player2[]) {
         statistics[1].success = 0;
     }
 
-    //TODO:
-    //print_endscreen();
-
+    if(winner == 1) {
+        print_endscreen(1, player1);
+    } else if(winner == 2) {
+        print_endscreen(1, player2);
+    } else {
+        print_endscreen(0, '\0');
+    }
 
     //Variablen zurücksetzen
     reset_vars();

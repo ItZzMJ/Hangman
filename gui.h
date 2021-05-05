@@ -58,6 +58,6 @@ void print_main_menu(int selection);
 void print_highscorelist(Highscore *highscores, int count);
 void print_game(int error_count, int input_count);
 void print_time_and_tries(int input_count, int error_count);
-void print_endscreen(int game_won);
+void print_endscreen(int game_won, char *username);
 
 #endif //HANGMAN_GUI_H
