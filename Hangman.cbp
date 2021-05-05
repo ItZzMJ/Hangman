@@ -32,10 +32,18 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="Highscoreliste.csv" />
+		<Unit filename="fileio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fileio.h" />
 		<Unit filename="game.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="game.h" />
+		<Unit filename="gui.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

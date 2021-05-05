@@ -266,7 +266,6 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
 
     } while (game_finished == 0);
 
-
     //Statistik speichern und zurückgeben
     for(int i = 0; i < strlen(username); i++) {
         statistic.username[i] = username[i];
@@ -286,7 +285,7 @@ Statistic run(char solution[128], char *username, int with_time_limit) {
     statistic.solution[strlen(solution)] = '\0';
 
 
-    print_endscreen(game_won, '\0');
+    print_endscreen(game_won, username);
 
     //Variablen zurücksetzen
     reset_vars();

@@ -383,7 +383,6 @@ int run_game()
 
             //Spiel start
             statistic = run(solution, username, time_limit);
-
             break;
 
         case 2: //2 Spieler
@@ -407,7 +406,6 @@ int run_game()
 
             memset(statistics, 0, sizeof(Statistic) * 2);
             statistics = NULL;
-
             break;
 
         case 3: //1 Spieler gegen Zeit
@@ -421,7 +419,6 @@ int run_game()
 
             //Spiel start
             statistic = run(solution, username, time_limit);
-
             break;
 
         case 4: //zurück
@@ -477,7 +474,6 @@ int main() {
                             selection--;
                         }
                         print_main_menu(selection);
-
                         break;
 
                     case 80: //Pfeiltaste nach unten

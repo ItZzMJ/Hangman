@@ -82,3 +82,61 @@
 	"game.h"
 	"fileio.h"
 
+1620154849 source:g:\dokumente\github\hangman\fileio.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	<ctype.h>
+	"game.h"
+	"gui.h"
+	"fileio.h"
+
+1620154849 g:\dokumente\github\hangman\game.h
+
+1620228874 g:\dokumente\github\hangman\gui.h
+
+1620154849 g:\dokumente\github\hangman\fileio.h
+
+1620231949 source:g:\dokumente\github\hangman\game.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<stdbool.h>
+	<time.h>
+	"game.h"
+	"gui.h"
+	"fileio.h"
+
+1620228874 source:g:\dokumente\github\hangman\gui.c
+	<conio.h>
+	<stdio.h>
+	<stdbool.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	"game.h"
+	"fileio.h"
+
+1620232895 source:g:\dokumente\github\hangman\main.c
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	<stdbool.h>
+	<string.h>
+	<unistd.h>
+	<errno.h>
+	<time.h>
+	<windows.h>
+	<ctype.h>
+	"gui.h"
+	"fileio.h"
+	"game.h"
+
